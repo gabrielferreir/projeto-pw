@@ -41,8 +41,10 @@ function validador(parametros, schemaValidador, caminho) {
 
 function criaValidador(parametros, schemaValidador, caminho) {
     const array = [];
-    if (Array.isArray(schemaValidador)) // Verifico se é um array
-        schemaValidador = schemaValidador[0];    // Pego o primeiro elemento
+    if (Array.isArray(schemaValidador)) {       // Verifico se é um array
+        schemaValidador = schemaValidador[0];   // Pego o primeiro elemento
+        caminho = caminho + '[]';
+    }
     Object.keys(schemaValidador).forEach(propDoValidador => {   // Percorro o schema atual
         if (schemaValidador[propDoValidador] instanceof Object) // Verifico se o schema é um objeto
             criaValidador(parametros, schemaValidador[propDoValidador], `${caminho ? caminho + '.' : ''}${propDoValidador}`);   // Chamo novamente a função
@@ -58,22 +60,47 @@ function _validaCampo(parametros, caminho, funcao, valorDaFuncao) {
     const arrayDeCaminhos = caminho.split('.');
     const find = findProperty(parametros, arrayDeCaminhos);
 
-    console.log('caminho', caminho);
+    // console.log('caminho', caminho);
     console.log('find', find);
 }
 
 function findProperty(params, path) {
+    // console.log(params);
     try {
-        if (path.length) {
-            const removed = path.pop();
-            return findProperty(params[removed], path);
+        // console.log('path', path);
+        if (path.length > 1) {
+            let removed = path.shift();
+            if (removed.substr(-2) === '[]') {
+                removed = removed.substr(0, removed.length - 2);
+                // for()
+            }
+            // console.log('params[removed]', params[removed]);
+            findProperty(params[removed], path);
+        } else {
+            console.log(path)
+            return;
         }
-        return params;
     } catch (e) {
-        return undefined;
+        console.log(e)
+        // return undefined;
     }
 
+
+    //     if (path.length) {
+    //         let removed = path.pop();
+    //         if(removed.substr(-2) === '[]') {
+    //             removed = removed.substr(0, removed.length - 2);
+    //         }
+    //         console.log('params', params);
+    //         console.log('removed', removed);
+    //         console.log('path', path);
+    //         return findProperty(params[removed], path);
+    //     }
+    //     return params;
+
+
 }
+
 
 const functions = {
     required: required,

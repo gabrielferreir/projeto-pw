@@ -8,26 +8,26 @@ module.exports = {
 async function create(req, res, next) {
     try {
         const params = {
-            name: req.body.name,
-            email: req.body.email,
-            pass: req.body.pass,
-            image: req.body.image,
-            phone: req.body.phone,
+            // name: req.body.name,
+            // email: req.body.email,
+            // pass: req.body.pass,
+            // image: req.body.image,
+            // phone: req.body.phone,
             dependencias: req.body.dependencias
         };
 
         const resultError = Validation(params, {
-            name: {
-                required: true
-            },
-            email: {
-                required: true
-            },
-            pass: {
-                required: true,
-                maxLenght: 4,
-                minLenght: 4
-            },
+            // name: {
+            //     required: true
+            // },
+            // email: {
+            //     required: true
+            // },
+            // pass: {
+            //     required: true,
+            //     maxLenght: 4,
+            //     minLenght: 4
+            // },
             dependencias: [{
                 name: {
                     required: true,
