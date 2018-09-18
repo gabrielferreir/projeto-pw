@@ -34,6 +34,16 @@ async function create(req, res, next) {
                     minLenght: 3,
                     maxLenght: 8
                 },
+                phone: [{
+                    ddd: {
+                        required: true,
+                        maxLenght: 3
+                    },
+                    number: [{
+                        required: true,
+                        maxLenght: 9
+                    }]
+                }]
             }]
         });
 
