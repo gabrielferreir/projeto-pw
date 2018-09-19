@@ -6,39 +6,26 @@ function validador(parametros, schemaValidador, caminho) {
         schemaValidador = schemaValidador[0];
         caminho = caminho + '[]';
     }
-    Object.keys(schemaValidador).forEach(propDoValidador => {   // Percorro o schema atual
-        if (schemaValidador[propDoValidador] instanceof Object) // Verifico se o schema é um objeto
-            array.push(...validador(parametros, schemaValidador[propDoValidador], `${caminho ? caminho + '.' : ''}${propDoValidador}`));   // Chamo novamente a função
+    Object.keys(schemaValidador).forEach(propDoValidador => {
+        if (schemaValidador[propDoValidador] instanceof Object)
+            array.push(...validador(parametros, schemaValidador[propDoValidador], `${caminho ? caminho + '.' : ''}${propDoValidador}`));
         else {
-            const response = _validaCampo(parametros, caminho, propDoValidador, schemaValidador[propDoValidador]);
-            response && array.push(response);
+            const response = _valida(parametros, caminho, propDoValidador, schemaValidador[propDoValidador]);
+            response && response.length && array.push(...response);
         }
     });
     return array;
 }
 
-function _validaCampo(parametros, caminho, funcao, valorDaFuncao) {
-    console.log('ValidaCampo');
-    // console.log('parametros', parametros);
-    // console.log('caminho', caminho);
-    // console.log('funcao', funcao);
-    // console.log('valorDaFuncao', valorDaFuncao);
-    const arrayDeCaminhos = caminho.split('.');
-    const find = findProperty(parametros, arrayDeCaminhos) || [];
+function _valida(parametros, caminho, funcao, valorDaFuncao) {
+    const arrayPath = caminho.split('.');
+    const find = findProperty(parametros, arrayPath) || [];
     const array = [];
-    find.forEach(fin => {
-        // console.log('fin', fin);
-        const result = psol(fin, funcao, valorDaFuncao);
-        if (result) array.push(result);
-        // console.log('result', result);
+    find.forEach((fin, index) => {
+        const result = functions[funcao](fin.path, valorDaFuncao, fin.value);
+        if (result) array.push({...result, fullPath: fin.fullPath, index: find.length > 1 ? index : undefined});
     });
-
-    // console.log('array', array);
     return array;
-}
-
-function psol(object, func, valueFunc) {
-    return functions[func](object.path, valueFunc, object.value);
 }
 
 function findProperty(params, fullPath, path) {
@@ -65,7 +52,6 @@ function findProperty(params, fullPath, path) {
     }
     return itensQueDevemSerValidados;
 }
-
 
 
 

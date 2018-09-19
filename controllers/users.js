@@ -9,25 +9,26 @@ async function create(req, res, next) {
     try {
         const params = {
             name: req.body.name,
-            // email: req.body.email,
-            // pass: req.body.pass,
-            // image: req.body.image,
-            // phone: req.body.phone,
+            email: req.body.email,
+            pass: req.body.pass,
+            image: req.body.image,
+            phone: req.body.phone,
             dependencias: req.body.dependencias
         };
 
+        console.time('Tempo');
         const resultError = Validation(params, {
             name: {
                 required: true
             },
-            // email: {
-            //     required: true
-            // },
-            // pass: {
-            //     required: true,
-            //     maxLenght: 4,
-            //     minLenght: 4
-            // },
+            email: {
+                required: true
+            },
+            pass: {
+                required: true,
+                maxLenght: 4,
+                minLenght: 4
+            },
             dependencias: [{
                 name: {
                     required: true,
@@ -46,9 +47,7 @@ async function create(req, res, next) {
                 }]
             }]
         });
-
-        console.log('resultError', resultError);
-
+        console.timeEnd('Tempo');
 
         res.status(200).json({
             message: 'OK',
