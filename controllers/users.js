@@ -8,7 +8,7 @@ module.exports = {
 async function create(req, res, next) {
     try {
         const params = {
-            // name: req.body.name,
+            name: req.body.name,
             // email: req.body.email,
             // pass: req.body.pass,
             // image: req.body.image,
@@ -17,9 +17,9 @@ async function create(req, res, next) {
         };
 
         const resultError = Validation(params, {
-            // name: {
-            //     required: true
-            // },
+            name: {
+                required: true
+            },
             // email: {
             //     required: true
             // },
@@ -31,8 +31,8 @@ async function create(req, res, next) {
             dependencias: [{
                 name: {
                     required: true,
-                    minLenght: 3,
-                    maxLenght: 8
+                    // minLenght: 3,
+                    // maxLenght: 8
                 },
                 phone: [{
                     ddd: {
@@ -46,6 +46,8 @@ async function create(req, res, next) {
                 }]
             }]
         });
+
+        console.log('resultError', resultError);
 
 
         res.status(200).json({

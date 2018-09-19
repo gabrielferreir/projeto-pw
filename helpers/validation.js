@@ -1,53 +1,14 @@
 module.exports = validador;
 
-function validation(params, validator, property) {
-    let errors = [];
-    Object.keys(validator).forEach(key => {
-        const listProporties = Array.isArray(validator[key]) ? validator[key][0] : validator[key];
-        if (Array.isArray(validator[key])) {
-            let arrayOfSubErros = [];
-            const paramsKey = params[key] || [];
-            paramsKey.forEach((sub, index) => {
-                const subErrors = validation(sub, validator[key][0], key);
-                arrayOfSubErros.push({index: index, ...subErrors});
-            });
-            errors.push({[key]: arrayOfSubErros})
-        } else {
-            Object.keys(listProporties).forEach((properties) => {
-                const response = functions[properties](key, validator[key][properties], params[key]);
-                if (response) errors.push(response);
-            })
-        }
-    });
-    return errors;
-}
-
-// const caminhos = [];
-
 function validador(parametros, schemaValidador, caminho) {
-    // // parametros = parametros || {};  // Pode não existir a propriedade no parametro e ela pode existir no schema
-    // if (Array.isArray(schemaValidador))// Verifico se é um array
-    //     schemaValidador = schemaValidador[0];    // Pego o primeiro elemento
-    // Object.keys(schemaValidador).forEach(propDoValidador => {   // Percorro o schema atual
-    //     if (schemaValidador[propDoValidador] instanceof Object) // Verifico se o schema é um objeto
-    //         validador(schemaValidador[propDoValidador], `${caminho ? caminho + '.' : ''}${propDoValidador}`);   // Chamo novamente a função
-    //     else {
-    //         _validaCampo(caminho, propDoValidador, schemaValidador[propDoValidador]);
-    //     }
-    // });
-
-    criaValidador(parametros, schemaValidador, caminho);
-}
-
-function criaValidador(parametros, schemaValidador, caminho) {
     const array = [];
-    if (Array.isArray(schemaValidador)) {       // Verifico se é um array
-        schemaValidador = schemaValidador[0];   // Pego o primeiro elemento
+    if (Array.isArray(schemaValidador)) {
+        schemaValidador = schemaValidador[0];
         caminho = caminho + '[]';
     }
     Object.keys(schemaValidador).forEach(propDoValidador => {   // Percorro o schema atual
         if (schemaValidador[propDoValidador] instanceof Object) // Verifico se o schema é um objeto
-            criaValidador(parametros, schemaValidador[propDoValidador], `${caminho ? caminho + '.' : ''}${propDoValidador}`);   // Chamo novamente a função
+            array.push(...validador(parametros, schemaValidador[propDoValidador], `${caminho ? caminho + '.' : ''}${propDoValidador}`));   // Chamo novamente a função
         else {
             const response = _validaCampo(parametros, caminho, propDoValidador, schemaValidador[propDoValidador]);
             response && array.push(response);
@@ -57,49 +18,60 @@ function criaValidador(parametros, schemaValidador, caminho) {
 }
 
 function _validaCampo(parametros, caminho, funcao, valorDaFuncao) {
-    const arrayDeCaminhos = caminho.split('.');
-    const find = findProperty(parametros, arrayDeCaminhos);
-
+    console.log('ValidaCampo');
+    // console.log('parametros', parametros);
     // console.log('caminho', caminho);
-    console.log('find', find);
+    // console.log('funcao', funcao);
+    // console.log('valorDaFuncao', valorDaFuncao);
+    const arrayDeCaminhos = caminho.split('.');
+    const find = findProperty(parametros, arrayDeCaminhos) || [];
+    const array = [];
+    find.forEach(fin => {
+        // console.log('fin', fin);
+        const result = psol(fin, funcao, valorDaFuncao);
+        if (result) array.push(result);
+        // console.log('result', result);
+    });
+
+    // console.log('array', array);
+    return array;
 }
 
-function findProperty(params, path) {
-    // console.log(params);
-    try {
-        // console.log('path', path);
-        if (path.length > 1) {
-            let removed = path.shift();
-            if (removed.substr(-2) === '[]') {
-                removed = removed.substr(0, removed.length - 2);
-                // for()
-            }
-            // console.log('params[removed]', params[removed]);
-            findProperty(params[removed], path);
+function psol(object, func, valueFunc) {
+    return functions[func](object.path, valueFunc, object.value);
+}
+
+function findProperty(params, fullPath, path) {
+    let itensQueDevemSerValidados = [];
+    let backupFullPath = fullPath ? fullPath.slice() : [];
+    path = path || fullPath;
+    if (path.length > 1) {
+        let removed = path.shift();
+        if (removed.substr(-2) === '[]') {
+            removed = removed.substr(0, removed.length - 2);
+            const obj = params[removed] || [];
+            obj.forEach(property => {
+                itensQueDevemSerValidados.push({
+                    path: path[0],
+                    value: property[path[0]],
+                    fullPath: backupFullPath.join('.')
+                });
+            })
         } else {
-            console.log(path)
-            return;
+            findProperty(params[removed], backupFullPath, path);
         }
-    } catch (e) {
-        console.log(e)
-        // return undefined;
+    } else {
+        itensQueDevemSerValidados.push({path: path[0], value: params[path[0]], fullPath: backupFullPath.join('.')});
     }
-
-
-    //     if (path.length) {
-    //         let removed = path.pop();
-    //         if(removed.substr(-2) === '[]') {
-    //             removed = removed.substr(0, removed.length - 2);
-    //         }
-    //         console.log('params', params);
-    //         console.log('removed', removed);
-    //         console.log('path', path);
-    //         return findProperty(params[removed], path);
-    //     }
-    //     return params;
-
-
+    return itensQueDevemSerValidados;
 }
+
+
+
+
+
+
+
 
 
 const functions = {
