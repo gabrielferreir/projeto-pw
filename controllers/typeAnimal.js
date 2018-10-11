@@ -1,9 +1,11 @@
 const Schema = require('../schemas/TypeAnimal');
+const Paginate = require('../helpers/paginate/paginate');
 
 module.exports = {
     create,
     update,
     read,
+    readAll,
     remove
 };
 
@@ -48,7 +50,27 @@ async function read(req, res, next) {
             return res.status(200).json(user || {});
         });
     } catch (e) {
+        next(e);
+    }
+}
 
+async function readAll(req, res, next) {
+    try {
+        const params = {
+            filter: req.query.filter,
+            page: req.query.page || 1,
+            quantity: req.query.quantity || 10
+        };
+
+        const response = await Paginate(Schema, params);
+
+        res.status(200).json({
+            content: response
+        });
+
+    } catch
+        (e) {
+        next(e);
     }
 }
 

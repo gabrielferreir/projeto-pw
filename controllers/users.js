@@ -1,6 +1,6 @@
-const Schema = require('../schemas/users');
-const Validation = require('../helpers/validator/validation');
+const Schema = require('../schemas/Users');
 const crypto = require('../helpers/crypto/crypto');
+const Validator = require('../helpers/validator/validator2');
 
 module.exports = {
     create,
@@ -12,21 +12,79 @@ module.exports = {
 async function create(req, res, next) {
     try {
         const params = {
-            name: req.body.name,
+            name: 'as',
             email: req.body.email,
             pass: crypto.encryptMd5(req.body.pass),
             image: req.body.image,
-            phone: req.body.phone,
+            phone: [
+                {ddd: 10},
+                {pax: 10}
+            ],
         };
 
-        Schema.create(params).then(response => {
-            res.status(200).json({
-                message: 'OK',
-                id: response.id
-            })
-        }, err => {
-            next(err)
-        });
+        const schema = {
+            name: {
+                required: true,
+                minLength: 2
+            },
+            phone: {
+                type: Array,
+                max: 4,
+                min: 1,
+                childs: {
+                    ddd: {
+                        required: true
+                    },
+                    number: {
+                        required: true
+                    }
+                }
+            },
+            dependentes: {
+                type: Array,
+                childs: {
+                    nome: {
+                        required: true
+                    },
+                    phones: {
+                        type: Array,
+                        childs: {
+                            dddPhones: {
+                                required: true
+                            }
+                        }
+                    }
+                }
+            }
+            // email: {
+            //     required: true
+            // },
+            // pass: {
+            //     required: true
+            // },
+            // teste: {
+            //     min: 2,
+            //     max: 3
+            // },
+            // 'teste.p': {
+            //     required: true
+            // }
+        };
+
+        const invalid = Validator(params, schema);
+        // console.log('invalid', invalid.errors);
+        if (invalid.status === 400) {
+            return next(invalid);
+        }
+
+        // Schema.create(params).then(response => {
+        res.status(200).json({
+            message: 'OK',
+            // id: response.id
+        })
+        // }, err => {
+        //     next(err)
+        // });
 
     } catch (error) {
         next(error);
