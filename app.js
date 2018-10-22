@@ -12,6 +12,8 @@ const sizeRouter = require('./routes/size');
 const breedRouter = require('./routes/breed');
 const typeAnimaldRouter = require('./routes/typeAnimal');
 
+const {InvalidParam} = require('node-schema-validator');
+
 const app = express();
 
 // view engine setup
@@ -35,21 +37,15 @@ app.use('/breed', breedRouter);
 app.use('/type-animal', typeAnimaldRouter);
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
     next(createError(404));
 });
 
 // error handler
-app.use(function (err, req, res, next) {
-    // set locals, only providing error in development
-    // res.locals.message = err.message;
-    // res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.use((err, req, res, next) => {
 
-    // console.log('err', err);
-
-    if (err.status === 400) {
-        return res.status(err.status).json(err.errors);
-    }
+    if (err instanceof InvalidParam)
+        return res.status(400).json(err);
 
 
     return res.status(err.status || 500).json({

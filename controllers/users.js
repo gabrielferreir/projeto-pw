@@ -1,6 +1,6 @@
 const Schema = require('../schemas/Users');
 const crypto = require('../helpers/crypto/crypto');
-const Validator = require('../helpers/validator/validator2');
+const {Scope} = require('node-schema-validator');
 
 module.exports = {
     create,
@@ -12,79 +12,46 @@ module.exports = {
 async function create(req, res, next) {
     try {
         const params = {
-            name: 'as',
+            name: req.body.name,
             email: req.body.email,
             pass: crypto.encryptMd5(req.body.pass),
             image: req.body.image,
-            phone: [
-                {ddd: 10},
-                {pax: 10}
-            ],
+            phone: req.body.phone,
         };
 
         const schema = {
             name: {
+                type: String,
                 required: true,
-                minLength: 2
+                minLength: 3,
+                maxLength: 32
+            },
+            email: {
+                isEmail: true,
+                required: true
+            },
+            pass: {
+                type: String,
+                maxLength: 32
             },
             phone: {
-                type: Array,
-                max: 4,
-                min: 1,
-                childs: {
-                    ddd: {
-                        required: true
-                    },
-                    number: {
-                        required: true
-                    }
-                }
-            },
-            dependentes: {
-                type: Array,
-                childs: {
-                    nome: {
-                        required: true
-                    },
-                    phones: {
-                        type: Array,
-                        childs: {
-                            dddPhones: {
-                                required: true
-                            }
-                        }
-                    }
-                }
+                type: String,
+                maxLength: 11,
+                minLength: 8
             }
-            // email: {
-            //     required: true
-            // },
-            // pass: {
-            //     required: true
-            // },
-            // teste: {
-            //     min: 2,
-            //     max: 3
-            // },
-            // 'teste.p': {
-            //     required: true
-            // }
         };
 
-        const invalid = Validator(params, schema);
-        // console.log('invalid', invalid.errors);
-        if (invalid.status === 400) {
-            return next(invalid);
-        }
+        const scope = new Scope();
+        scope.isValid(params, schema);
 
-        // Schema.create(params).then(response => {
-        res.status(200).json({
-            message: 'OK',
-            // id: response.id
-        })
-        // }, err => {
-        //     next(err)
-        // });
+        Schema.create(params).then(response => {
+            res.status(200).json({
+                message: 'OK',
+                id: response.id
+            })
+        }, err => {
+            next(err)
+        });
 
     } catch (error) {
         next(error);
@@ -93,11 +60,45 @@ async function create(req, res, next) {
 
 async function update(req, res, next) {
     try {
+        const params = {
+            name: req.body.name,
+            email: req.body.email,
+            pass: crypto.encryptMd5(req.body.pass),
+            image: req.body.image,
+            phone: req.body.phone,
+        };
+
+        const schema = {
+            name: {
+                type: String,
+                required: true,
+                minLength: 3,
+                maxLength: 32
+            },
+            email: {
+                isEmail: true,
+                required: true
+            },
+            pass: {
+                type: String,
+                maxLength: 32
+            },
+            phone: {
+                type: String,
+                maxLength: 11,
+                minLength: 8
+            }
+        };
+
+        const scope = new Scope();
+        scope.isValid(params, schema);
+
         Schema.findOneAndUpdate({_id: req.params.id}, req.body, null, (err, doc) => {
-            if (err) next(err)
+            if (err) next(err);
+
             return res.status(200).json({message: 'OK'});
         });
-    } catch (e) {
+    } catch (err) {
         next(err);
     }
 }
