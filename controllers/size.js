@@ -1,4 +1,13 @@
 const Schema = require('../schemas/Size');
+const {Scope} = require('node-schema-validator');
+
+const schema = {
+    name: {
+        type: String,
+        required: true,
+        maxLength: 32
+    }
+};
 
 module.exports = {
     create,
@@ -12,6 +21,9 @@ async function create(req, res, next) {
         const params = {
             name: req.body.name,
         };
+
+        const scope = new Scope();
+        scope.isValid(params, schema);
 
         Schema.create(params).then(response => {
             res.status(200).json({
@@ -32,12 +44,16 @@ async function update(req, res, next) {
         const params = {
             name: req.body.name,
         };
+
+        const scope = new Scope();
+        scope.isValid(params, schema);
+
         Schema.findOneAndUpdate({_id: req.params.id}, params, null, (err, doc) => {
             if (err) next(err)
             return res.status(200).json({message: 'OK'});
         });
-    } catch (e) {
-        next(err);
+    } catch (error) {
+        next(error);
     }
 }
 
@@ -47,8 +63,8 @@ async function read(req, res, next) {
             if (err) next(err);
             return res.status(200).json(user || {});
         });
-    } catch (e) {
-
+    } catch (error) {
+        next(error);
     }
 }
 
@@ -59,7 +75,7 @@ async function remove(req, res, next) {
             return res.status(200).json({message: 'OK'});
         });
     } catch (e) {
-
+        next(error);
     }
 
 }
