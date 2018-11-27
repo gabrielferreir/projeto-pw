@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const cors = require('cors');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -28,9 +29,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 require('./config/mongoose');
 
+app.use(cors());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/animal', animalRouter);
+app.use('/animals', animalRouter);
 app.use('/temperament', temperamentRouter);
 app.use('/size', sizeRouter);
 app.use('/breed', breedRouter);

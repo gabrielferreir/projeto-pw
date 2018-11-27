@@ -4,8 +4,8 @@ const controller = require('../controllers/temperament');
 
 /* GET users listing. */
 router.post('/', controller.create);
+router.get('/', controller.read);
 router.put('/:id', controller.update);
-router.get('/:id', controller.read);
 router.delete('/:id', controller.remove);
 
 module.exports = router;

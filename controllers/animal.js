@@ -1,5 +1,6 @@
 const Schema = require('../schemas/Animal');
 const {Scope} = require('node-schema-validator');
+const auth = require('./users');
 
 const schema = {
     idUser: {
@@ -89,7 +90,8 @@ module.exports = {
     update,
     read,
     remove,
-    readAll
+    readAll,
+    myAnimals
 };
 
 async function create(req, res, next) {
@@ -171,7 +173,7 @@ async function read(req, res, next) {
     try {
         Schema.findById(req.params.id, (err, user) => {
             if (err) next(err);
-            return res.status(200).json(user || {});
+            return res.status(200).json({content: user || {}});
         });
     } catch (e) {
 
@@ -204,8 +206,33 @@ async function remove(req, res, next) {
             if (err) next(err);
             return res.status(200).json({message: 'OK'});
         });
-    } catch (e) {
-
+    } catch (error) {
+        next(error);
     }
+}
 
+async function myAnimals(req, res, next) {
+    try {
+        console.log('myAnimals');
+        const token = req.body.token || req.query.token || req.headers['authentication'];
+        const decodeToken = await auth.decodeToken(token);
+        // // const data = await repository.getMyAnimais(decodeToken.id);
+        // console.log(decodeToken);
+
+        Schema.find({idUser: decodeToken.id})
+            .populate('idUser')
+            .populate('typeAnimal')
+            .populate('size')
+            .populate('breed')
+            .populate('temperament')
+            .exec()
+            .then(response => {
+                return res.json({content: response})
+            }, err => {
+                next(err)
+            });
+
+    } catch (error) {
+        next(error);
+    }
 }

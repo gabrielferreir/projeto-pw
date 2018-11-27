@@ -59,12 +59,12 @@ async function update(req, res, next) {
 
 async function read(req, res, next) {
     try {
-        Schema.findById(req.params.id, (err, user) => {
-            if (err) next(err);
-            return res.status(200).json(user || {});
-        });
-    } catch (e) {
-
+        Schema.find({})
+            .then(result => {
+                return res.status(200).json({content: result || {}});
+            }).catch(error => next(error));
+    } catch (error) {
+        next(error);
     }
 }
 
