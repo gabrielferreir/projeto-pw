@@ -52,6 +52,7 @@ const Animal = new Schema({
     phone: {
         type: String
     },
+    images: {},
     cep: {
         type: String
     },

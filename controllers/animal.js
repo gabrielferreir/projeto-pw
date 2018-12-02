@@ -102,7 +102,7 @@ async function create(req, res, next) {
             breed: req.body.breed,
             temperament: req.body.temperament,
             age: req.body.age,
-            // active: req.body.active,
+            images: req.body.images,
             phone: req.body.phone,
             cep: req.body.cep,
             street: req.body.street,
@@ -146,6 +146,7 @@ async function update(req, res, next) {
             size: req.body.size,
             breed: req.body.breed,
             temperament: req.body.temperament,
+            images: req.body.images,
             age: req.body.age,
             active: req.body.active,
             phone: req.body.phone,
@@ -174,10 +175,12 @@ async function read(req, res, next) {
     try {
         Schema.findById(req.params.id, (err, user) => {
             if (err) next(err);
-            return res.status(200).json({content: user || {}});
+            const data = {...user._doc, images: user.images || []};
+            console.log(data);
+            return res.status(200).json({content: data || {}});
         });
     } catch (e) {
-
+        next(e)
     }
 }
 
