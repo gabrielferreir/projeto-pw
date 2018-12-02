@@ -121,7 +121,7 @@ async function read(req, res, next) {
             return res.status(200).json(user || {});
         });
     } catch (e) {
-
+        next(e);
     }
 }
 

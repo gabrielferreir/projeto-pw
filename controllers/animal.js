@@ -39,10 +39,6 @@ const schema = {
         type: Number,
         required: true
     },
-    active: {
-        type: Boolean,
-        required: true
-    },
     phone: {
         type: String,
         maxLength: 11,
@@ -96,8 +92,8 @@ module.exports = {
 
 async function create(req, res, next) {
     try {
-        const params = {
-            idUser: req.body.idUser,
+        let params = {
+            // idUser: req.body.idUser,
             typeAnimal: req.body.typeAnimal,
             name: req.body.name,
             description: req.body.description,
@@ -106,7 +102,7 @@ async function create(req, res, next) {
             breed: req.body.breed,
             temperament: req.body.temperament,
             age: req.body.age,
-            active: req.body.active,
+            // active: req.body.active,
             phone: req.body.phone,
             cep: req.body.cep,
             street: req.body.street,
@@ -116,6 +112,11 @@ async function create(req, res, next) {
             city: req.body.city,
             complement: req.body.complement
         };
+
+        const infoUser = await auth.decodeToken(req.headers.authentication);
+        params.idUser = infoUser.id;
+
+        console.log(params);
 
         const scope = new Scope();
         scope.isValid(params, schema);
@@ -182,6 +183,13 @@ async function read(req, res, next) {
 
 async function readAll(req, res, next) {
     try {
+        const params = {
+            typeAnimal: {
+                name: req.query.tipo
+            }
+        };
+
+        // console.log(params);
         Schema.find()
             .populate('idUser')
             .populate('typeAnimal')
